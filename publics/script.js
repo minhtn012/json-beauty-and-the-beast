@@ -1,4 +1,51 @@
 // ===========================================
+// LOCALSTORAGE MANAGEMENT
+// ===========================================
+const STORAGE_KEYS = {
+    JSON_INPUT: 'jsonParser_jsonInput',
+    JSON_INPUT_A: 'jsonParser_jsonInputA',
+    JSON_INPUT_B: 'jsonParser_jsonInputB'
+};
+
+function saveToStorage(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch (e) {
+        console.warn('Failed to save to localStorage:', e);
+    }
+}
+
+function loadFromStorage(key) {
+    try {
+        return localStorage.getItem(key) || '';
+    } catch (e) {
+        console.warn('Failed to load from localStorage:', e);
+        return '';
+    }
+}
+
+function clearStorage(key) {
+    try {
+        localStorage.removeItem(key);
+    } catch (e) {
+        console.warn('Failed to clear localStorage:', e);
+    }
+}
+
+// Debounce function to avoid saving too frequently
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// ===========================================
 // TAB SWITCHING FUNCTION
 // ===========================================
 function switchTab(tabName) {
@@ -117,6 +164,15 @@ function clearInput(elementId) {
     if (element) {
         element.value = '';
         element.focus();
+
+        // Clear from localStorage
+        if (elementId === 'jsonInput') {
+            clearStorage(STORAGE_KEYS.JSON_INPUT);
+        } else if (elementId === 'jsonInputA') {
+            clearStorage(STORAGE_KEYS.JSON_INPUT_A);
+        } else if (elementId === 'jsonInputB') {
+            clearStorage(STORAGE_KEYS.JSON_INPUT_B);
+        }
     }
 }
 
@@ -356,6 +412,24 @@ compareButton.addEventListener('click', () => {
 
 
 // ===========================================
+// SETUP AUTO-SAVE TO LOCALSTORAGE
+// ===========================================
+function setupAutoSave(elementId, storageKey) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    // Create debounced save function
+    const debouncedSave = debounce((value) => {
+        saveToStorage(storageKey, value);
+    }, 500);
+
+    // Add input event listener
+    element.addEventListener('input', (e) => {
+        debouncedSave(e.target.value);
+    });
+}
+
+// ===========================================
 // INITIALIZE SYNC SCROLL ON PAGE LOAD
 // ===========================================
 window.addEventListener('DOMContentLoaded', () => {
@@ -367,4 +441,24 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Setup sync scroll for outputs (jsonParsedA and jsonParsedB)
     setupSyncScroll('jsonParsedA', 'jsonParsedB', 'syncToggleOutputs');
+
+    // Load saved data from localStorage
+    const savedJsonInput = loadFromStorage(STORAGE_KEYS.JSON_INPUT);
+    const savedJsonInputA = loadFromStorage(STORAGE_KEYS.JSON_INPUT_A);
+    const savedJsonInputB = loadFromStorage(STORAGE_KEYS.JSON_INPUT_B);
+
+    if (savedJsonInput) {
+        document.getElementById('jsonInput').value = savedJsonInput;
+    }
+    if (savedJsonInputA) {
+        document.getElementById('jsonInputA').value = savedJsonInputA;
+    }
+    if (savedJsonInputB) {
+        document.getElementById('jsonInputB').value = savedJsonInputB;
+    }
+
+    // Setup auto-save for all inputs
+    setupAutoSave('jsonInput', STORAGE_KEYS.JSON_INPUT);
+    setupAutoSave('jsonInputA', STORAGE_KEYS.JSON_INPUT_A);
+    setupAutoSave('jsonInputB', STORAGE_KEYS.JSON_INPUT_B);
 });
