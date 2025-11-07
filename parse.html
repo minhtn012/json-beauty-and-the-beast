@@ -90,6 +90,172 @@
             position: relative;
         }
 
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+
+        .clear-btn {
+            padding: 8px 10px;
+            background: rgba(100, 116, 139, 0.15);
+            color: #475569;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            margin: 0;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-btn:hover {
+            background: rgba(100, 116, 139, 0.25);
+            border-color: rgba(100, 116, 139, 0.3);
+        }
+
+        .clear-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Sync Scroll Toggle Switch */
+        .sync-switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px 0;
+        }
+
+        .sync-switch-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sync-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .sync-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .sync-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .sync-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .sync-switch input:checked + .sync-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .sync-switch input:checked + .sync-slider:before {
+            transform: translateX(24px);
+        }
+
+        .sync-slider:hover {
+            opacity: 0.9;
+        }
+
+        /* Fullscreen Mode */
+        .fullscreen-mode {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+            z-index: 9999;
+            background: #fff;
+            padding: 20px !important;
+            margin: 0 !important;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .fullscreen-mode .content {
+            height: calc(100vh - 150px);
+        }
+
+        .fullscreen-mode textarea,
+        .fullscreen-mode pre {
+            height: calc(100vh - 200px) !important;
+            min-height: calc(100vh - 200px) !important;
+        }
+
+        .fullscreen-btn {
+            padding: 8px 10px;
+            background: rgba(100, 116, 139, 0.15);
+            color: #475569;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            margin: 0;
+            margin-left: 10px;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(100, 116, 139, 0.25);
+            border-color: rgba(100, 116, 139, 0.3);
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
         .output-wrapper {
             position: relative;
         }
@@ -240,8 +406,8 @@
         }
 
         #compareButton {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .error-display {
@@ -401,12 +567,31 @@
         <p>Parse nested JSON and compare with ease</p>
     </div>
 
-    <div class="container">
+    <div class="container" id="jsonViewerContainer">
         <h2>JSON Viewer</h2>
+
+        <div class="sync-switch-container">
+            <label class="sync-switch-label">
+                🔗 Sync Scroll
+            </label>
+            <label class="sync-switch">
+                <input type="checkbox" id="syncToggleViewer">
+                <span class="sync-slider"></span>
+            </label>
+            <button class="fullscreen-btn" onclick="toggleFullscreen('jsonViewerContainer')" title="Toggle fullscreen">
+                <span id="fullscreenIconViewer">🔲</span>
+            </button>
+        </div>
+
         <div class="content">
             <div class="box">
                 <h3 class="input-label">Input (Paste your JSON here)</h3>
-                <textarea id="jsonInput" rows="20"></textarea>
+                <div class="input-wrapper">
+                    <div class="input-actions">
+                        <button class="clear-btn" onclick="clearInput('jsonInput')" title="Clear input">🗑️</button>
+                    </div>
+                    <textarea id="jsonInput" rows="20"></textarea>
+                </div>
                 <button id="parseButton">Parse JSON</button>
                 <div id="errorDisplayParser" class="error-display"></div>
             </div>
@@ -428,22 +613,63 @@
 
     <div class="container">
         <h2>JSON Diff Comparison</h2>
+    </div>
+
+    <div class="container" id="jsonDiffInputsContainer">
+        <div class="sync-switch-container">
+            <label class="sync-switch-label">
+                🔗 Sync Scroll Inputs
+            </label>
+            <label class="sync-switch">
+                <input type="checkbox" id="syncToggleInputs">
+                <span class="sync-slider"></span>
+            </label>
+            <button class="fullscreen-btn" onclick="toggleFullscreen('jsonDiffInputsContainer')" title="Toggle fullscreen">
+                <span id="fullscreenIconDiffInputs">🔲</span>
+            </button>
+        </div>
+
         <div class="content">
             <div class="box">
                 <h3 class="input-label">JSON A (Original)</h3>
-                <textarea id="jsonInputA" rows="15"></textarea>
+                <div class="input-wrapper">
+                    <div class="input-actions">
+                        <button class="clear-btn" onclick="clearInput('jsonInputA')" title="Clear input">🗑️</button>
+                    </div>
+                    <textarea id="jsonInputA" rows="15"></textarea>
+                </div>
             </div>
 
             <div class="box">
                 <h3 class="input-label">JSON B (Compare)</h3>
-                <textarea id="jsonInputB" rows="15"></textarea>
+                <div class="input-wrapper">
+                    <div class="input-actions">
+                        <button class="clear-btn" onclick="clearInput('jsonInputB')" title="Clear input">🗑️</button>
+                    </div>
+                    <textarea id="jsonInputB" rows="15"></textarea>
+                </div>
             </div>
         </div>
 
         <button id="compareButton">🔍 Compare A and B</button>
         <div id="errorDisplayDiff" class="error-display"></div>
+    </div>
 
-        <div class="content" style="margin-top: 20px;">
+    <div class="container" id="jsonDiffOutputsContainer">
+        <div class="sync-switch-container">
+            <label class="sync-switch-label">
+                🔗 Sync Scroll Outputs
+            </label>
+            <label class="sync-switch">
+                <input type="checkbox" id="syncToggleOutputs">
+                <span class="sync-slider"></span>
+            </label>
+            <button class="fullscreen-btn" onclick="toggleFullscreen('jsonDiffOutputsContainer')" title="Toggle fullscreen">
+                <span id="fullscreenIconDiffOutputs">🔲</span>
+            </button>
+        </div>
+
+        <div class="content">
             <div class="box">
                 <h3 class="output-label">JSON A (Parsed)</h3>
                 <div class="output-wrapper">
@@ -482,6 +708,109 @@
 
 
     <script>
+        // ===========================================
+        // FULLSCREEN TOGGLE FUNCTION
+        // ===========================================
+        function toggleFullscreen(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const isFullscreen = container.classList.contains('fullscreen-mode');
+
+            if (isFullscreen) {
+                // Exit fullscreen
+                container.classList.remove('fullscreen-mode');
+                document.body.style.overflow = '';
+
+                // Update icon based on container
+                updateFullscreenIcon(containerId, false);
+            } else {
+                // Enter fullscreen
+                container.classList.add('fullscreen-mode');
+                document.body.style.overflow = 'hidden';
+
+                // Update icon
+                updateFullscreenIcon(containerId, true);
+            }
+        }
+
+        function updateFullscreenIcon(containerId, isFullscreen) {
+            const iconMap = {
+                'jsonViewerContainer': 'fullscreenIconViewer',
+                'jsonDiffInputsContainer': 'fullscreenIconDiffInputs',
+                'jsonDiffOutputsContainer': 'fullscreenIconDiffOutputs'
+            };
+
+            const iconId = iconMap[containerId];
+            if (iconId) {
+                const icon = document.getElementById(iconId);
+                if (icon) {
+                    icon.textContent = isFullscreen ? '✕' : '🔲';
+                }
+            }
+        }
+
+        // ESC key to exit fullscreen
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.fullscreen-mode').forEach(container => {
+                    container.classList.remove('fullscreen-mode');
+                    document.body.style.overflow = '';
+                    updateFullscreenIcon(container.id, false);
+                });
+            }
+        });
+
+        // ===========================================
+        // SYNCHRONIZED SCROLL FUNCTION
+        // ===========================================
+        function setupSyncScroll(elem1Id, elem2Id, toggleId) {
+            const elem1 = document.getElementById(elem1Id);
+            const elem2 = document.getElementById(elem2Id);
+            const toggle = document.getElementById(toggleId);
+
+            if (!elem1 || !elem2 || !toggle) return;
+
+            let isSyncing = false;
+
+            function syncScroll(source, target) {
+                if (isSyncing) return;
+                isSyncing = true;
+
+                const sourceScrollHeight = source.scrollHeight - source.clientHeight;
+                const targetScrollHeight = target.scrollHeight - target.clientHeight;
+
+                if (sourceScrollHeight > 0 && targetScrollHeight > 0) {
+                    const scrollPercentage = source.scrollTop / sourceScrollHeight;
+                    target.scrollTop = scrollPercentage * targetScrollHeight;
+                }
+
+                setTimeout(() => { isSyncing = false; }, 10);
+            }
+
+            function onElem1Scroll() {
+                if (toggle.checked) syncScroll(elem1, elem2);
+            }
+
+            function onElem2Scroll() {
+                if (toggle.checked) syncScroll(elem2, elem1);
+            }
+
+            elem1.addEventListener('scroll', onElem1Scroll);
+            elem2.addEventListener('scroll', onElem2Scroll);
+        }
+
+        // ===========================================
+        // CLEAR INPUT FUNCTION
+        // ===========================================
+        function clearInput(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.value = '';
+                element.focus();
+            }
+        }
+
         // ===========================================
         // COPY TO CLIPBOARD FUNCTION
         // ===========================================
@@ -578,7 +907,7 @@
         const parseButton = document.getElementById('parseButton');
         const errorDisplayParser = document.getElementById('errorDisplayParser');
 
-        jsonInput.value = `"{\\"key\\": \\"value\\", \\"nested\\": \\"{\\\\\\"a\\\\\\": 1}\\"}"`; // Ví dụ
+        jsonInput.placeholder = `Example: "{\\"key\\": \\"value\\", \\"nested\\": \\"{\\\\\\"a\\\\\\": 1}\\"}"`;  // Ví dụ
 
         parseButton.addEventListener('click', () => {
             errorDisplayParser.textContent = '';
@@ -615,9 +944,9 @@
         const jsonParsedB = document.getElementById('jsonParsedB');
         const jsonDiffOutput = document.getElementById('jsonDiffOutput');
 
-        // Gán data mẫu cho phần Diff để test
-        jsonInputA.value = `{"id": 123, "name": "John", "active": true, "roles": ["user"], "prefs": "{\\"theme\\": \\"dark\\"}"}`;
-        jsonInputB.value = `{"id": 123, "name": "Jane", "active": true, "roles": ["user", "admin"], "new_key": "hello", "prefs": "{\\"theme\\": \\"light\\"}"}`;
+        // Gán data mẫu cho phần Diff để test (dùng placeholder thay vì value)
+        jsonInputA.placeholder = `Example: {"id": 123, "name": "John", "active": true, "roles": ["user"], "prefs": "{\\"theme\\": \\"dark\\"}"}`;
+        jsonInputB.placeholder = `Example: {"id": 123, "name": "Jane", "active": true, "roles": ["user", "admin"], "new_key": "hello", "prefs": "{\\"theme\\": \\"light\\"}"}`;
 
         /**
          * Format diff output with HTML styling
@@ -714,6 +1043,21 @@
             } catch (error) {
                 errorDisplayDiff.textContent = `❌ Invalid JSON: ${error.message}`;
             }
+        });
+
+
+        // ===========================================
+        // INITIALIZE SYNC SCROLL ON PAGE LOAD
+        // ===========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            // Setup sync scroll for JSON Viewer (jsonInput and jsonOutput)
+            setupSyncScroll('jsonInput', 'jsonOutput', 'syncToggleViewer');
+
+            // Setup sync scroll for inputs (jsonInputA and jsonInputB)
+            setupSyncScroll('jsonInputA', 'jsonInputB', 'syncToggleInputs');
+
+            // Setup sync scroll for outputs (jsonParsedA and jsonParsedB)
+            setupSyncScroll('jsonParsedA', 'jsonParsedB', 'syncToggleOutputs');
         });
 
     </script>
