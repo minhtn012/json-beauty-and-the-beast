@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Parser & Diff Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1600px;
+            margin: 0 auto 30px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: "⚡";
+            font-size: 1.2em;
+        }
+
+        h3 {
+            color: #4a5568;
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .box {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .output-wrapper {
+            position: relative;
+        }
+
+        .action-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .icon-btn {
+            padding: 8px 10px;
+            background: rgba(100, 116, 139, 0.15);
+            color: #475569;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            margin: 0;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: rgba(100, 116, 139, 0.25);
+            border-color: rgba(100, 116, 139, 0.3);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.98);
+        }
+
+        .icon-btn.success {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .input-label::before {
+            content: "📝";
+        }
+
+        .output-label::before {
+            content: "✨";
+        }
+
+        .diff-label::before {
+            content: "🔍";
+        }
+
+        textarea, pre {
+            width: 100%;
+            height: 40vh;
+            min-height: 250px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        textarea {
+            resize: vertical;
+            color: #2d3748;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: #fff;
+        }
+
+        pre {
+            overflow: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-left: 4px solid #667eea;
+            color: #2d3748;
+        }
+
+        /* JSON Syntax Highlighting */
+        .json-key {
+            color: #0c7cd5;
+            font-weight: 600;
+        }
+
+        .json-string {
+            color: #00864e;
+        }
+
+        .json-number {
+            color: #b35a00;
+        }
+
+        .json-boolean {
+            color: #aa3e98;
+            font-weight: 600;
+        }
+
+        .json-null {
+            color: #aa3e98;
+            font-weight: 600;
+        }
+
+        /* Style riêng cho các output của Diff */
+        #jsonParsedA, #jsonParsedB {
+            min-height: 300px;
+            background: linear-gradient(to bottom, #f8fafc, #ffffff);
+        }
+
+        #jsonDiffOutput {
+            min-height: 150px;
+            background: linear-gradient(to bottom, #fffbeb, #ffffff);
+            border-left-color: #f59e0b;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #compareButton {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .error-display {
+            color: #dc2626;
+            font-weight: 600;
+            margin-top: 12px;
+            min-height: 1.2em;
+            padding: 10px 15px;
+            background: #fee2e2;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+            display: none;
+        }
+
+        .error-display:not(:empty) {
+            display: block;
+            animation: shake 0.4s ease;
+        }
+
+        .success-display {
+            color: #059669;
+            font-weight: 600;
+            margin-top: 12px;
+            padding: 10px 15px;
+            background: #d1fae5;
+            border-radius: 8px;
+            border-left: 4px solid #059669;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+            margin: 40px 0;
+        }
+
+        /* Diff styling */
+        .diff-added {
+            color: #059669;
+            background: #d1fae5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .diff-removed {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .diff-changed {
+            color: #d97706;
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Loading animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+
+            textarea, pre {
+                font-size: 12px;
+                padding: 12px;
+            }
+
+            .action-buttons {
+                top: 8px;
+                right: 8px;
+                gap: 6px;
+            }
+
+            .icon-btn {
+                padding: 6px 8px;
+                font-size: 14px;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🎯 JSON Parser & Diff Tool</h1>
+        <p>Parse nested JSON and compare with ease</p>
+    </div>
+
+    <div class="container">
+        <h2>JSON Viewer</h2>
+        <div class="content">
+            <div class="box">
+                <h3 class="input-label">Input (Paste your JSON here)</h3>
+                <textarea id="jsonInput" rows="20"></textarea>
+                <button id="parseButton">Parse JSON</button>
+                <div id="errorDisplayParser" class="error-display"></div>
+            </div>
+
+            <div class="box">
+                <h3 class="output-label">Output (Formatted Result)</h3>
+                <div class="output-wrapper">
+                    <div class="action-buttons">
+                        <button class="icon-btn" onclick="copyToClipboard('jsonOutput', this)" title="Copy to clipboard">📋</button>
+                        <button class="icon-btn export-btn" onclick="exportToFile('jsonOutput', 'parsed-output.json')" title="Export to file">💾</button>
+                    </div>
+                    <pre id="jsonOutput"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <h2>JSON Diff Comparison</h2>
+        <div class="content">
+            <div class="box">
+                <h3 class="input-label">JSON A (Original)</h3>
+                <textarea id="jsonInputA" rows="15"></textarea>
+            </div>
+
+            <div class="box">
+                <h3 class="input-label">JSON B (Compare)</h3>
+                <textarea id="jsonInputB" rows="15"></textarea>
+            </div>
+        </div>
+
+        <button id="compareButton">🔍 Compare A and B</button>
+        <div id="errorDisplayDiff" class="error-display"></div>
+
+        <div class="content" style="margin-top: 20px;">
+            <div class="box">
+                <h3 class="output-label">JSON A (Parsed)</h3>
+                <div class="output-wrapper">
+                    <div class="action-buttons">
+                        <button class="icon-btn" onclick="copyToClipboard('jsonParsedA', this)" title="Copy to clipboard">📋</button>
+                        <button class="icon-btn export-btn" onclick="exportToFile('jsonParsedA', 'json-a-parsed.json')" title="Export to file">💾</button>
+                    </div>
+                    <pre id="jsonParsedA"></pre>
+                </div>
+            </div>
+
+            <div class="box">
+                <h3 class="output-label">JSON B (Parsed)</h3>
+                <div class="output-wrapper">
+                    <div class="action-buttons">
+                        <button class="icon-btn" onclick="copyToClipboard('jsonParsedB', this)" title="Copy to clipboard">📋</button>
+                        <button class="icon-btn export-btn" onclick="exportToFile('jsonParsedB', 'json-b-parsed.json')" title="Export to file">💾</button>
+                    </div>
+                    <pre id="jsonParsedB"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="box" style="margin-top: 20px;">
+            <h3 class="diff-label">Comparison Result</h3>
+            <div class="output-wrapper">
+                <div class="action-buttons">
+                    <button class="icon-btn" onclick="copyToClipboard('jsonDiffOutput', this)" title="Copy to clipboard">📋</button>
+                    <button class="icon-btn export-btn" onclick="exportToFile('jsonDiffOutput', 'diff-result.txt')" title="Export to file">💾</button>
+                </div>
+                <pre id="jsonDiffOutput"></pre>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script>
+        // ===========================================
+        // COPY TO CLIPBOARD FUNCTION
+        // ===========================================
+        function copyToClipboard(elementId, button) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent || element.innerText;
+
+            if (!text || text.trim() === '') {
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                // Change button state
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '✓';
+                button.classList.add('success');
+
+                // Reset after 1.5 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalIcon;
+                    button.classList.remove('success');
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        // ===========================================
+        // EXPORT TO FILE FUNCTION
+        // ===========================================
+        function exportToFile(elementId, filename) {
+            const element = document.getElementById(elementId);
+
+            if (!element) {
+                alert('Element not found!');
+                return;
+            }
+
+            // Get text content, stripping HTML if present
+            let text = element.textContent || element.innerText;
+
+            // If element contains HTML (like diff output), extract clean text
+            if (element.innerHTML !== element.textContent) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = element.innerHTML;
+                text = tempDiv.textContent || tempDiv.innerText;
+            }
+
+            if (!text || text.trim() === '') {
+                alert('Nothing to export!');
+                return;
+            }
+
+            // Create blob and download
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // ===========================================
+        // HÀM CHUNG: PARSE JSON LỒNG NHAU
+        // ===========================================
+        function parseNestedJson(obj) {
+            for (const key in obj) {
+                if (!obj.hasOwnProperty(key)) continue;
+                const value = obj[key];
+                if (typeof value === 'string') {
+                    try {
+                        const parsedValue = JSON.parse(value);
+                        if (parsedValue && typeof parsedValue === 'object') {
+                            obj[key] = parsedValue;
+                            parseNestedJson(obj[key]); 
+                        }
+                    } catch (e) { /* Bỏ qua */ }
+                } else if (typeof value === 'object' && value !== null) {
+                    parseNestedJson(value); 
+                }
+            }
+        }
+
+
+        // ===========================================
+        // LOGIC CHO PHẦN 1: JSON PARSER
+        // ===========================================
+        const jsonInput = document.getElementById('jsonInput');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const parseButton = document.getElementById('parseButton');
+        const errorDisplayParser = document.getElementById('errorDisplayParser');
+
+        jsonInput.value = `"{\\"key\\": \\"value\\", \\"nested\\": \\"{\\\\\\"a\\\\\\": 1}\\"}"`; // Ví dụ
+
+        parseButton.addEventListener('click', () => {
+            errorDisplayParser.textContent = '';
+            jsonOutput.textContent = '';
+            const inputText = jsonInput.value;
+
+            if (!inputText) {
+                errorDisplayParser.textContent = '⚠️ Input is empty!';
+                return;
+            }
+
+            try {
+                let data = JSON.parse(inputText);
+                if (typeof data === 'string') {
+                    data = JSON.parse(data);
+                }
+                parseNestedJson(data);
+                jsonOutput.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                errorDisplayParser.textContent = `❌ Invalid JSON: ${error.message}`;
+            }
+        });
+
+
+        // ===========================================
+        // LOGIC CHO PHẦN 2: JSON DIFF
+        // ===========================================
+        const jsonInputA = document.getElementById('jsonInputA');
+        const jsonInputB = document.getElementById('jsonInputB');
+        const compareButton = document.getElementById('compareButton');
+        const errorDisplayDiff = document.getElementById('errorDisplayDiff');
+
+        const jsonParsedA = document.getElementById('jsonParsedA');
+        const jsonParsedB = document.getElementById('jsonParsedB');
+        const jsonDiffOutput = document.getElementById('jsonDiffOutput');
+
+        // Gán data mẫu cho phần Diff để test
+        jsonInputA.value = `{"id": 123, "name": "John", "active": true, "roles": ["user"], "prefs": "{\\"theme\\": \\"dark\\"}"}`;
+        jsonInputB.value = `{"id": 123, "name": "Jane", "active": true, "roles": ["user", "admin"], "new_key": "hello", "prefs": "{\\"theme\\": \\"light\\"}"}`;
+
+        /**
+         * Format diff output with HTML styling
+         */
+        function formatDiffLine(line) {
+            if (line.startsWith('[+]')) {
+                return `<span class="diff-added">${line}</span>`;
+            } else if (line.startsWith('[-]')) {
+                return `<span class="diff-removed">${line}</span>`;
+            } else if (line.startsWith('[~]')) {
+                return `<span class="diff-changed">${line}</span>`;
+            }
+            return line;
+        }
+
+        /**
+         * Recursive function to find differences
+         */
+        function findDifferences(objA, objB, path = '') {
+            let diffs = [];
+            const allKeys = new Set([...Object.keys(objA), ...Object.keys(objB)]);
+
+            allKeys.forEach(key => {
+                const currentPath = path ? `${path}.${key}` : key;
+                const valA = objA[key];
+                const valB = objB[key];
+
+                if (key in objB && !(key in objA)) {
+                    diffs.push(`[+] Added: ${currentPath} = ${JSON.stringify(valB)}`);
+                }
+                else if (key in objA && !(key in objB)) {
+                    diffs.push(`[-] Removed: ${currentPath} (old value: ${JSON.stringify(valA)})`);
+                }
+                else if (key in objA && key in objB) {
+                    if (typeof valA !== typeof valB) {
+                        diffs.push(`[~] Type changed: ${currentPath} (from ${typeof valA} to ${typeof valB})`);
+                    }
+                    else if (typeof valA === 'object' && valA !== null && !Array.isArray(valA) && typeof valB === 'object' && valB !== null && !Array.isArray(valB)) {
+                        diffs.push(...findDifferences(valA, valB, currentPath));
+                    }
+                    else if (Array.isArray(valA) && Array.isArray(valB)) {
+                        if (JSON.stringify(valA) !== JSON.stringify(valB)) {
+                            diffs.push(`[~] Array changed: ${currentPath}\n    A: ${JSON.stringify(valA)}\n    B: ${JSON.stringify(valB)}`);
+                        }
+                    }
+                    else if (valA !== valB) {
+                        diffs.push(`[~] Value changed: ${currentPath} (from ${JSON.stringify(valA)} to ${JSON.stringify(valB)})`);
+                    }
+                }
+            });
+            return diffs;
+        }
+
+        compareButton.addEventListener('click', () => {
+            errorDisplayDiff.textContent = '';
+            jsonParsedA.textContent = '';
+            jsonParsedB.textContent = '';
+            jsonDiffOutput.innerHTML = '';
+
+            const textA = jsonInputA.value;
+            const textB = jsonInputB.value;
+
+            if (!textA || !textB) {
+                errorDisplayDiff.textContent = '⚠️ Both JSON A and B fields must contain data!';
+                return;
+            }
+
+            try {
+                let objA = JSON.parse(textA);
+                let objB = JSON.parse(textB);
+
+                if (typeof objA === 'string') {
+                    objA = JSON.parse(objA);
+                }
+                if (typeof objB === 'string') {
+                    objB = JSON.parse(objB);
+                }
+
+                parseNestedJson(objA);
+                parseNestedJson(objB);
+
+                jsonParsedA.textContent = JSON.stringify(objA, null, 2);
+                jsonParsedB.textContent = JSON.stringify(objB, null, 2);
+
+                const diffs = findDifferences(objA, objB);
+
+                if (diffs.length === 0) {
+                    jsonDiffOutput.innerHTML = '<div class="success-display">✅ No differences found. The two JSON objects are identical (after nested parsing).</div>';
+                } else {
+                    const formattedDiffs = diffs.map(formatDiffLine).join('\n');
+                    jsonDiffOutput.innerHTML = formattedDiffs;
+                }
+
+            } catch (error) {
+                errorDisplayDiff.textContent = `❌ Invalid JSON: ${error.message}`;
+            }
+        });
+
+    </script>
+
+</body>
+</html>
