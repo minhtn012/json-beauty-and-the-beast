@@ -1,0 +1,10 @@
+Royal Blue
+#0e61cb
+
+Chili Pepper
+#ff3d33
+
+Lilac
+#ddd5f4
+
+Olive Green
