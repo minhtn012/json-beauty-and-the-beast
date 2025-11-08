@@ -39,30 +39,29 @@
         <div id="tab-viewer" class="tab-content active">
         <div class="container-inner" id="jsonViewerContainer">
 
-        <div class="control-panel">
-            <span class="control-label">CONTROLS:</span>
-            <button class="control-btn sync-btn active" id="syncBtnViewer" onclick="toggleSync('syncToggleViewer', this)" title="Toggle synchronized scrolling">
-                SYNC: ON
-            </button>
-            <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonViewerContainer')" title="Toggle fullscreen mode">
-                FULLSCREEN
-            </button>
-            <input type="checkbox" id="syncToggleViewer" checked style="display: none;">
-        </div>
+        <input type="checkbox" id="syncToggleViewer" checked style="display: none;">
 
         <div class="content">
             <div class="box">
                 <div class="box-header">
-                    <h3 class="input-label">▼ PLAYER INPUT</h3>
+                    <div class="header-left">
+                        <h3 class="input-label">▼ PLAYER INPUT</h3>
+                        <button class="control-btn sync-btn active" id="syncBtnViewer" onclick="toggleSync('syncToggleViewer', this)" title="Toggle synchronized scrolling">
+                            SYNC: ON
+                        </button>
+                        <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonViewerContainer')" title="Toggle fullscreen mode">
+                            FULLSCREEN
+                        </button>
+                        <button id="parseButton" class="parse-btn-inline">▶ PARSE JSON</button>
+                    </div>
                     <div class="input-actions">
                         <button class="clear-btn" onclick="clearInput('jsonInput')" title="Clear input">✖</button>
                     </div>
                 </div>
+                <div id="errorDisplayParser" class="error-display"></div>
                 <div class="input-wrapper">
                     <textarea id="jsonInput" rows="20"></textarea>
                 </div>
-                <button id="parseButton">▶ PARSE JSON</button>
-                <div id="errorDisplayParser" class="error-display"></div>
             </div>
 
             <div class="box">
@@ -86,25 +85,26 @@
         <div id="tab-diff" class="tab-content">
 
     <div class="container" id="jsonDiffInputsContainer">
-        <div class="control-panel">
-            <span class="control-label">CONTROLS:</span>
-            <button class="control-btn sync-btn active" id="syncBtnInputs" onclick="toggleSync('syncToggleInputs', this)" title="Toggle synchronized scrolling">
-                SYNC: ON
-            </button>
-            <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonDiffInputsContainer')" title="Toggle fullscreen mode">
-                FULLSCREEN
-            </button>
-            <input type="checkbox" id="syncToggleInputs" checked style="display: none;">
-        </div>
+        <input type="checkbox" id="syncToggleInputs" checked style="display: none;">
 
         <div class="content">
             <div class="box">
                 <div class="box-header">
-                    <h3 class="input-label">◀ FILE A [ORIGINAL]</h3>
+                    <div class="header-left">
+                        <h3 class="input-label">◀ FILE A [ORIGINAL]</h3>
+                        <button class="control-btn sync-btn active" id="syncBtnInputs" onclick="toggleSync('syncToggleInputs', this)" title="Toggle synchronized scrolling">
+                            SYNC: ON
+                        </button>
+                        <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonDiffInputsContainer')" title="Toggle fullscreen mode">
+                            FULLSCREEN
+                        </button>
+                        <button id="compareButton" class="compare-btn-inline">⚔ COMPARE A vs B</button>
+                    </div>
                     <div class="input-actions">
                         <button class="clear-btn" onclick="clearInput('jsonInputA')" title="Clear input">✖</button>
                     </div>
                 </div>
+                <div id="errorDisplayDiff" class="error-display"></div>
                 <div class="input-wrapper">
                     <textarea id="jsonInputA" rows="15"></textarea>
                 </div>
@@ -122,27 +122,23 @@
                 </div>
             </div>
         </div>
-
-        <button id="compareButton">⚔ COMPARE A vs B</button>
-        <div id="errorDisplayDiff" class="error-display"></div>
     </div>
 
     <div class="container" id="jsonDiffOutputsContainer">
-        <div class="control-panel">
-            <span class="control-label">CONTROLS:</span>
-            <button class="control-btn sync-btn active" id="syncBtnOutputs" onclick="toggleSync('syncToggleOutputs', this)" title="Toggle synchronized scrolling">
-                SYNC: ON
-            </button>
-            <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonDiffOutputsContainer')" title="Toggle fullscreen mode">
-                FULLSCREEN
-            </button>
-            <input type="checkbox" id="syncToggleOutputs" checked style="display: none;">
-        </div>
+        <input type="checkbox" id="syncToggleOutputs" checked style="display: none;">
 
         <div class="content">
             <div class="box">
                 <div class="box-header">
-                    <h3 class="output-label">★ FILE A [PARSED]</h3>
+                    <div class="header-left">
+                        <h3 class="output-label">★ FILE A [PARSED]</h3>
+                        <button class="control-btn sync-btn active" id="syncBtnOutputs" onclick="toggleSync('syncToggleOutputs', this)" title="Toggle synchronized scrolling">
+                            SYNC: ON
+                        </button>
+                        <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonDiffOutputsContainer')" title="Toggle fullscreen mode">
+                            FULLSCREEN
+                        </button>
+                    </div>
                     <div class="action-buttons">
                         <button class="icon-btn" onclick="copyToClipboard('jsonParsedA', this)" title="Copy to clipboard">⎘</button>
                         <button class="icon-btn export-btn" onclick="exportToFile('jsonParsedA', 'json-a-parsed.json')" title="Export to file">⬇</button>

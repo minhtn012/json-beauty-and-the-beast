@@ -39,6 +39,29 @@ function toggleTheme() {
     applyTheme(currentTheme);
 }
 
+function startTypewriter() {
+    const typewriterText = "JSON Parser - Beauty and the Beast";
+    let typewriterIndex = 0;
+    const typewriterSpeed = 60;
+
+    const element = document.getElementById('typewriter-text');
+    if (!element) return;
+
+    // Clear existing text
+    element.textContent = '';
+
+    function typeWriter() {
+        if (typewriterIndex < typewriterText.length) {
+            element.textContent += typewriterText.charAt(typewriterIndex);
+            typewriterIndex++;
+            setTimeout(typeWriter, typewriterSpeed);
+        }
+    }
+
+    // Start typewriter effect after a short delay
+    setTimeout(typeWriter, 300);
+}
+
 function applyTheme(theme) {
     const config = THEME_CONFIG[theme];
 
@@ -66,7 +89,7 @@ function applyTheme(theme) {
         // Nintendo: typewriter effect
         typewriterContainer.textContent = '';
         if (cursor) cursor.style.display = 'inline';
-        // Typewriter will start on DOMContentLoaded
+        startTypewriter();
     } else {
         // Modern: show full text immediately
         typewriterContainer.textContent = 'JSON Parser - Beauty and the Beast';
@@ -643,6 +666,17 @@ compareButton.addEventListener('click', () => {
             jsonDiffOutput.innerHTML = formattedDiffs;
         }
 
+        // Auto-scroll to results after successful comparison
+        setTimeout(() => {
+            const outputsContainer = document.getElementById('jsonDiffOutputsContainer');
+            if (outputsContainer) {
+                outputsContainer.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }, 100);
+
     } catch (error) {
         errorDisplayDiff.textContent = `Invalid JSON: ${error.message}`;
     }
@@ -710,25 +744,4 @@ window.addEventListener('DOMContentLoaded', () => {
     setupAutoSave('jsonInput', STORAGE_KEYS.JSON_INPUT);
     setupAutoSave('jsonInputA', STORAGE_KEYS.JSON_INPUT_A);
     setupAutoSave('jsonInputB', STORAGE_KEYS.JSON_INPUT_B);
-
-    // ===========================================
-    // TYPEWRITER EFFECT FOR TITLE (Nintendo theme only)
-    // ===========================================
-    if (currentTheme === THEMES.NINTENDO) {
-        const typewriterText = "JSON Parser - Beauty and the Beast";
-        let typewriterIndex = 0;
-        const typewriterSpeed = 60; // milliseconds per character
-
-        function typeWriter() {
-            const element = document.getElementById('typewriter-text');
-            if (element && typewriterIndex < typewriterText.length) {
-                element.textContent += typewriterText.charAt(typewriterIndex);
-                typewriterIndex++;
-                setTimeout(typeWriter, typewriterSpeed);
-            }
-        }
-
-        // Start typewriter effect after a short delay
-        setTimeout(typeWriter, 300);
-    }
 });
