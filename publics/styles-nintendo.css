@@ -83,7 +83,7 @@ body::before {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 20px;
 }
 
@@ -136,6 +136,66 @@ body::before {
     font-weight: 400;
     text-align: left;
     letter-spacing: 1px;
+}
+
+/* Theme Switcher */
+.theme-switcher {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-label {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.4em;
+    color: var(--nes-black);
+    letter-spacing: 1px;
+}
+
+.theme-toggle-btn {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5em;
+    padding: 10px 16px;
+    background: var(--nes-green);
+    color: var(--nes-black);
+    border: 3px solid var(--nes-black);
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow:
+        inset -2px -2px 0px rgba(0,0,0,0.3),
+        inset 2px 2px 0px rgba(255,255,255,0.4),
+        0 4px 0 var(--nes-dark-gray);
+    white-space: nowrap;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--nes-yellow);
+    transform: translateY(1px);
+    box-shadow:
+        inset -2px -2px 0px rgba(0,0,0,0.4),
+        inset 2px 2px 0px rgba(255,255,255,0.3),
+        0 3px 0 var(--nes-dark-gray);
+}
+
+.theme-toggle-btn:active {
+    transform: translateY(4px);
+    box-shadow:
+        inset -1px -1px 0px rgba(0,0,0,0.5),
+        inset 1px 1px 0px rgba(255,255,255,0.2);
+}
+
+.theme-icon {
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.theme-name {
+    font-size: 0.9em;
 }
 
 /* Container - CRT Screen Style */
@@ -605,6 +665,36 @@ pre {
     font-weight: 700;
 }
 
+/* JSON Collapsible Nodes - Retro Style */
+.json-collapsible {
+    position: relative;
+}
+
+.json-toggle {
+    cursor: pointer;
+    user-select: none;
+    color: var(--nes-gray);
+    font-size: 1em;
+    margin-right: 4px;
+    display: inline-block;
+    width: 16px;
+    transition: color 0.1s ease;
+}
+
+.json-toggle:hover {
+    color: var(--nes-yellow);
+    text-shadow: 0 0 4px var(--nes-yellow);
+}
+
+.json-content {
+    display: inline;
+}
+
+.json-collapsed {
+    color: var(--nes-gray);
+    margin-left: 4px;
+}
+
 /* Diff Output Styles */
 #jsonParsedA, #jsonParsedB {
     min-height: 300px;
@@ -812,6 +902,21 @@ hr {
     .header p {
         font-size: 0.4em;
         text-align: center;
+    }
+
+    .theme-switcher {
+        order: -1;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .theme-label {
+        font-size: 0.35em;
+    }
+
+    .theme-toggle-btn {
+        font-size: 0.45em;
+        padding: 8px 12px;
     }
 
     .container, .container-inner {

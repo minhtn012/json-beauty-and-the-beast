@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="publics/favicon/favicon-16x16.png">
     <link rel="apple-touch-icon" href="publics/favicon/apple-touch-icon.png">
     <link rel="manifest" href="publics/favicon/site.webmanifest">
-    <link rel="stylesheet" href="publics/styles.css">
+    <link id="theme-stylesheet" rel="stylesheet" href="publics/styles-nintendo.css">
 </head>
 <body>
 
@@ -19,6 +19,13 @@
                 <span id="typewriter-text"></span><span class="typing-cursor">_</span>
             </h1>
             <p>Parse nested JSON and compare with ease</p>
+        </div>
+        <div class="theme-switcher">
+            <span class="theme-label">THEME:</span>
+            <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Switch theme">
+                <span class="theme-icon">🎮</span>
+                <span class="theme-name">NINTENDO</span>
+            </button>
         </div>
     </div>
 

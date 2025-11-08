@@ -1,4 +1,80 @@
 // ===========================================
+// THEME MANAGEMENT
+// ===========================================
+const THEMES = {
+    NINTENDO: 'nintendo',
+    MODERN: 'modern'
+};
+
+const THEME_CONFIG = {
+    nintendo: {
+        css: 'publics/styles-nintendo.css',
+        icon: '🎮',
+        name: 'NINTENDO',
+        tab1: '1P - JSON PARSER',
+        tab2: '2P - JSON COMPARE',
+        typewriter: true
+    },
+    modern: {
+        css: 'publics/styles-modern.css',
+        icon: '📱',
+        name: 'MODERN',
+        tab1: 'JSON Viewer',
+        tab2: 'JSON Diff',
+        typewriter: false
+    }
+};
+
+// Get saved theme or default to Nintendo
+let currentTheme = localStorage.getItem('theme') || THEMES.NINTENDO;
+
+function toggleTheme() {
+    // Toggle theme
+    currentTheme = currentTheme === THEMES.NINTENDO ? THEMES.MODERN : THEMES.NINTENDO;
+
+    // Save to localStorage
+    localStorage.setItem('theme', currentTheme);
+
+    // Apply theme
+    applyTheme(currentTheme);
+}
+
+function applyTheme(theme) {
+    const config = THEME_CONFIG[theme];
+
+    // Update CSS file
+    const stylesheet = document.getElementById('theme-stylesheet');
+    stylesheet.href = config.css;
+
+    // Update button
+    const button = document.getElementById('themeToggle');
+    const icon = button.querySelector('.theme-icon');
+    const name = button.querySelector('.theme-name');
+    icon.textContent = config.icon;
+    name.textContent = config.name;
+
+    // Update tab names
+    const tabs = document.querySelectorAll('.tab-button');
+    if (tabs[0]) tabs[0].textContent = config.tab1;
+    if (tabs[1]) tabs[1].textContent = config.tab2;
+
+    // Handle typewriter effect
+    const typewriterContainer = document.getElementById('typewriter-text');
+    const cursor = document.querySelector('.typing-cursor');
+
+    if (config.typewriter) {
+        // Nintendo: typewriter effect
+        typewriterContainer.textContent = '';
+        if (cursor) cursor.style.display = 'inline';
+        // Typewriter will start on DOMContentLoaded
+    } else {
+        // Modern: show full text immediately
+        typewriterContainer.textContent = 'JSON Parser - Beauty and the Beast';
+        if (cursor) cursor.style.display = 'none';
+    }
+}
+
+// ===========================================
 // LOCALSTORAGE MANAGEMENT
 // ===========================================
 const STORAGE_KEYS = {
@@ -268,6 +344,163 @@ function parseNestedJson(obj) {
     }
 }
 
+// ===========================================
+// SYNTAX HIGHLIGHTING WITH COLLAPSIBLE NODES
+// ===========================================
+function highlightJSON(obj, indent = 0, path = '') {
+    const INDENT = '  ';
+    let html = '';
+
+    if (obj === null) {
+        return `<span class="json-null">null</span>`;
+    }
+
+    if (typeof obj === 'boolean') {
+        return `<span class="json-boolean">${obj}</span>`;
+    }
+
+    if (typeof obj === 'number') {
+        return `<span class="json-number">${obj}</span>`;
+    }
+
+    if (typeof obj === 'string') {
+        return `<span class="json-string">"${escapeHtml(obj)}"</span>`;
+    }
+
+    if (Array.isArray(obj)) {
+        if (obj.length === 0) {
+            return '[]';
+        }
+
+        const currentPath = path;
+        html += `<span class="json-collapsible" data-path="${currentPath}">`;
+        html += `<span class="json-toggle">▼</span>[`;
+        html += `<span class="json-content">\n`;
+
+        obj.forEach((item, index) => {
+            const itemPath = `${currentPath}[${index}]`;
+            html += INDENT.repeat(indent + 1);
+            html += highlightJSON(item, indent + 1, itemPath);
+            if (index < obj.length - 1) {
+                html += ',';
+            }
+            html += '\n';
+        });
+
+        html += INDENT.repeat(indent) + ']';
+        html += '</span>';
+        html += `<span class="json-collapsed" style="display:none;">...</span>]`;
+        html += '</span>';
+        return html;
+    }
+
+    if (typeof obj === 'object') {
+        const keys = Object.keys(obj);
+        if (keys.length === 0) {
+            return '{}';
+        }
+
+        const currentPath = path;
+        html += `<span class="json-collapsible" data-path="${currentPath}">`;
+        html += `<span class="json-toggle">▼</span>{`;
+        html += `<span class="json-content">\n`;
+
+        keys.forEach((key, index) => {
+            const keyPath = path ? `${path}.${key}` : key;
+            html += INDENT.repeat(indent + 1);
+            html += `<span class="json-key">"${escapeHtml(key)}"</span>: `;
+            html += highlightJSON(obj[key], indent + 1, keyPath);
+            if (index < keys.length - 1) {
+                html += ',';
+            }
+            html += '\n';
+        });
+
+        html += INDENT.repeat(indent) + '}';
+        html += '</span>';
+        html += `<span class="json-collapsed" style="display:none;">...</span>}`;
+        html += '</span>';
+        return html;
+    }
+
+    return String(obj);
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ===========================================
+// TOGGLE COLLAPSE/EXPAND HANDLER
+// ===========================================
+function setupCollapseToggle(containerId, pairedContainerId, syncToggleId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Event delegation for toggle clicks
+    container.addEventListener('click', (e) => {
+        const toggle = e.target.closest('.json-toggle');
+        if (!toggle) return;
+
+        const collapsible = toggle.parentElement;
+        const content = collapsible.querySelector('.json-content');
+        const collapsed = collapsible.querySelector('.json-collapsed');
+        const path = collapsible.getAttribute('data-path');
+
+        // Toggle current element
+        const isCollapsed = content.style.display === 'none';
+
+        if (isCollapsed) {
+            // Expand
+            content.style.display = '';
+            collapsed.style.display = 'none';
+            toggle.textContent = '▼';
+        } else {
+            // Collapse
+            content.style.display = 'none';
+            collapsed.style.display = '';
+            toggle.textContent = '▶';
+        }
+
+        // Sync to paired container if sync is ON
+        if (pairedContainerId && syncToggleId) {
+            const syncToggle = document.getElementById(syncToggleId);
+            if (syncToggle && syncToggle.checked) {
+                syncCollapseState(pairedContainerId, path, !isCollapsed);
+            }
+        }
+    });
+}
+
+function syncCollapseState(containerId, path, shouldCollapse) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Find element with same path
+    const targetElement = container.querySelector(`[data-path="${path}"]`);
+    if (!targetElement) return;
+
+    const toggle = targetElement.querySelector('.json-toggle');
+    const content = targetElement.querySelector('.json-content');
+    const collapsed = targetElement.querySelector('.json-collapsed');
+
+    if (!toggle || !content || !collapsed) return;
+
+    if (shouldCollapse) {
+        // Collapse
+        content.style.display = 'none';
+        collapsed.style.display = '';
+        toggle.textContent = '▶';
+    } else {
+        // Expand
+        content.style.display = '';
+        collapsed.style.display = 'none';
+        toggle.textContent = '▼';
+    }
+}
+
 
 // ===========================================
 // LOGIC CHO PHẦN 1: JSON PARSER
@@ -281,7 +514,7 @@ jsonInput.placeholder = `Example: "{\\"key\\": \\"value\\", \\"nested\\": \\"{\\
 
 parseButton.addEventListener('click', () => {
     errorDisplayParser.textContent = '';
-    jsonOutput.textContent = '';
+    jsonOutput.innerHTML = '';
     const inputText = jsonInput.value;
 
     if (!inputText) {
@@ -295,7 +528,7 @@ parseButton.addEventListener('click', () => {
             data = JSON.parse(data);
         }
         parseNestedJson(data);
-        jsonOutput.textContent = JSON.stringify(data, null, 2);
+        jsonOutput.innerHTML = highlightJSON(data);
     } catch (error) {
         errorDisplayParser.textContent = `Invalid JSON: ${error.message}`;
     }
@@ -372,8 +605,8 @@ function findDifferences(objA, objB, path = '') {
 
 compareButton.addEventListener('click', () => {
     errorDisplayDiff.textContent = '';
-    jsonParsedA.textContent = '';
-    jsonParsedB.textContent = '';
+    jsonParsedA.innerHTML = '';
+    jsonParsedB.innerHTML = '';
     jsonDiffOutput.innerHTML = '';
 
     const textA = jsonInputA.value;
@@ -398,8 +631,8 @@ compareButton.addEventListener('click', () => {
         parseNestedJson(objA);
         parseNestedJson(objB);
 
-        jsonParsedA.textContent = JSON.stringify(objA, null, 2);
-        jsonParsedB.textContent = JSON.stringify(objB, null, 2);
+        jsonParsedA.innerHTML = highlightJSON(objA);
+        jsonParsedB.innerHTML = highlightJSON(objB);
 
         const diffs = findDifferences(objA, objB);
 
@@ -438,6 +671,9 @@ function setupAutoSave(elementId, storageKey) {
 // INITIALIZE SYNC SCROLL ON PAGE LOAD
 // ===========================================
 window.addEventListener('DOMContentLoaded', () => {
+    // Apply saved theme
+    applyTheme(currentTheme);
+
     // Setup sync scroll for JSON Viewer (jsonInput and jsonOutput)
     setupSyncScroll('jsonInput', 'jsonOutput', 'syncToggleViewer');
 
@@ -446,6 +682,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Setup sync scroll for outputs (jsonParsedA and jsonParsedB)
     setupSyncScroll('jsonParsedA', 'jsonParsedB', 'syncToggleOutputs');
+
+    // Setup collapse toggle for JSON outputs
+    // jsonOutput: no paired element (jsonInput is textarea)
+    setupCollapseToggle('jsonOutput', null, null);
+
+    // jsonParsedA ↔ jsonParsedB: sync collapse when syncToggleOutputs is ON
+    setupCollapseToggle('jsonParsedA', 'jsonParsedB', 'syncToggleOutputs');
+    setupCollapseToggle('jsonParsedB', 'jsonParsedA', 'syncToggleOutputs');
 
     // Load saved data from localStorage
     const savedJsonInput = loadFromStorage(STORAGE_KEYS.JSON_INPUT);
@@ -468,21 +712,23 @@ window.addEventListener('DOMContentLoaded', () => {
     setupAutoSave('jsonInputB', STORAGE_KEYS.JSON_INPUT_B);
 
     // ===========================================
-    // TYPEWRITER EFFECT FOR TITLE
+    // TYPEWRITER EFFECT FOR TITLE (Nintendo theme only)
     // ===========================================
-    const typewriterText = "JSON Parser - Beauty and the Beast";
-    let typewriterIndex = 0;
-    const typewriterSpeed = 60; // milliseconds per character
+    if (currentTheme === THEMES.NINTENDO) {
+        const typewriterText = "JSON Parser - Beauty and the Beast";
+        let typewriterIndex = 0;
+        const typewriterSpeed = 60; // milliseconds per character
 
-    function typeWriter() {
-        const element = document.getElementById('typewriter-text');
-        if (element && typewriterIndex < typewriterText.length) {
-            element.textContent += typewriterText.charAt(typewriterIndex);
-            typewriterIndex++;
-            setTimeout(typeWriter, typewriterSpeed);
+        function typeWriter() {
+            const element = document.getElementById('typewriter-text');
+            if (element && typewriterIndex < typewriterText.length) {
+                element.textContent += typewriterText.charAt(typewriterIndex);
+                typewriterIndex++;
+                setTimeout(typeWriter, typewriterSpeed);
+            }
         }
-    }
 
-    // Start typewriter effect after a short delay
-    setTimeout(typeWriter, 300);
+        // Start typewriter effect after a short delay
+        setTimeout(typeWriter, 300);
+    }
 });
