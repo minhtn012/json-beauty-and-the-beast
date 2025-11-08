@@ -65,6 +65,22 @@ function switchTab(tabName) {
 }
 
 // ===========================================
+// SYNC SCROLL TOGGLE FUNCTION
+// ===========================================
+function toggleSync(checkboxId, button) {
+    const checkbox = document.getElementById(checkboxId);
+    checkbox.checked = !checkbox.checked;
+
+    if (checkbox.checked) {
+        button.classList.add('active');
+        button.textContent = 'SYNC: ON';
+    } else {
+        button.classList.remove('active');
+        button.textContent = 'SYNC: OFF';
+    }
+}
+
+// ===========================================
 // FULLSCREEN TOGGLE FUNCTION
 // ===========================================
 function toggleFullscreen(containerId) {
@@ -91,19 +107,8 @@ function toggleFullscreen(containerId) {
 }
 
 function updateFullscreenIcon(containerId, isFullscreen) {
-    const iconMap = {
-        'jsonViewerContainer': 'fullscreenIconViewer',
-        'jsonDiffInputsContainer': 'fullscreenIconDiffInputs',
-        'jsonDiffOutputsContainer': 'fullscreenIconDiffOutputs'
-    };
-
-    const iconId = iconMap[containerId];
-    if (iconId) {
-        const icon = document.getElementById(iconId);
-        if (icon) {
-            icon.textContent = isFullscreen ? 'fullscreen_exit' : 'fullscreen';
-        }
-    }
+    // No longer needed - buttons don't change text
+    // Kept for compatibility
 }
 
 // ESC key to exit fullscreen
@@ -190,7 +195,7 @@ function copyToClipboard(elementId, button) {
     navigator.clipboard.writeText(text).then(() => {
         // Change button state
         const originalIcon = button.innerHTML;
-        button.innerHTML = '<span class="material-icons">check</span>';
+        button.innerHTML = '✓';
         button.classList.add('success');
 
         // Reset after 1.5 seconds
@@ -461,4 +466,23 @@ window.addEventListener('DOMContentLoaded', () => {
     setupAutoSave('jsonInput', STORAGE_KEYS.JSON_INPUT);
     setupAutoSave('jsonInputA', STORAGE_KEYS.JSON_INPUT_A);
     setupAutoSave('jsonInputB', STORAGE_KEYS.JSON_INPUT_B);
+
+    // ===========================================
+    // TYPEWRITER EFFECT FOR TITLE
+    // ===========================================
+    const typewriterText = "JSON Parser - Beauty and the Beast";
+    let typewriterIndex = 0;
+    const typewriterSpeed = 60; // milliseconds per character
+
+    function typeWriter() {
+        const element = document.getElementById('typewriter-text');
+        if (element && typewriterIndex < typewriterText.length) {
+            element.textContent += typewriterText.charAt(typewriterIndex);
+            typewriterIndex++;
+            setTimeout(typeWriter, typewriterSpeed);
+        }
+    }
+
+    // Start typewriter effect after a short delay
+    setTimeout(typeWriter, 300);
 });

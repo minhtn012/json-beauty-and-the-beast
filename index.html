@@ -8,7 +8,6 @@
     <link rel="icon" type="image/png" sizes="16x16" href="publics/favicon/favicon-16x16.png">
     <link rel="apple-touch-icon" href="publics/favicon/apple-touch-icon.png">
     <link rel="manifest" href="publics/favicon/site.webmanifest">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="publics/styles.css">
 </head>
 <body>
@@ -16,60 +15,58 @@
     <div class="header">
         <img src="publics/logo.png" alt="JSON Parser Logo" class="header-logo">
         <div class="header-text">
-            <h1>JSON Parser - Beauty and the Beast</h1>
+            <h1>
+                <span id="typewriter-text"></span><span class="typing-cursor">_</span>
+            </h1>
             <p>Parse nested JSON and compare with ease</p>
         </div>
     </div>
 
     <div class="tabs-container">
         <div class="tabs-header">
-            <button class="tab-button active" onclick="switchTab('viewer')">JSON Viewer</button>
-            <button class="tab-button" onclick="switchTab('diff')">JSON Diff</button>
+            <button class="tab-button tab-1p active" onclick="switchTab('viewer')">1P - JSON PARSER</button>
+            <button class="tab-button tab-2p" onclick="switchTab('diff')">2P - JSON COMPARE</button>
         </div>
 
         <!-- Tab 1: JSON Viewer -->
         <div id="tab-viewer" class="tab-content active">
         <div class="container-inner" id="jsonViewerContainer">
 
-        <div class="sync-switch-container">
-            <label class="sync-switch-label">
-                Sync Scroll
-            </label>
-            <label class="sync-switch">
-                <input type="checkbox" id="syncToggleViewer" checked>
-                <span class="sync-slider"></span>
-            </label>
-            <button class="fullscreen-btn" onclick="toggleFullscreen('jsonViewerContainer')" title="Toggle fullscreen">
-                <span class="material-icons" id="fullscreenIconViewer">fullscreen</span>
+        <div class="control-panel">
+            <span class="control-label">CONTROLS:</span>
+            <button class="control-btn sync-btn active" id="syncBtnViewer" onclick="toggleSync('syncToggleViewer', this)" title="Toggle synchronized scrolling">
+                SYNC: ON
             </button>
+            <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonViewerContainer')" title="Toggle fullscreen mode">
+                FULLSCREEN
+            </button>
+            <input type="checkbox" id="syncToggleViewer" checked style="display: none;">
         </div>
 
         <div class="content">
             <div class="box">
-                <h3 class="input-label">Input (Paste your JSON here)</h3>
-                <div class="input-wrapper">
+                <div class="box-header">
+                    <h3 class="input-label">▼ PLAYER INPUT</h3>
                     <div class="input-actions">
-                        <button class="clear-btn" onclick="clearInput('jsonInput')" title="Clear input">
-                            <span class="material-icons">clear</span>
-                        </button>
+                        <button class="clear-btn" onclick="clearInput('jsonInput')" title="Clear input">✖</button>
                     </div>
+                </div>
+                <div class="input-wrapper">
                     <textarea id="jsonInput" rows="20"></textarea>
                 </div>
-                <button id="parseButton">Parse JSON</button>
+                <button id="parseButton">▶ PARSE JSON</button>
                 <div id="errorDisplayParser" class="error-display"></div>
             </div>
 
             <div class="box">
-                <h3 class="output-label">Output (Formatted Result)</h3>
-                <div class="output-wrapper">
+                <div class="box-header">
+                    <h3 class="output-label">▲ GAME OUTPUT</h3>
                     <div class="action-buttons">
-                        <button class="icon-btn" onclick="copyToClipboard('jsonOutput', this)" title="Copy to clipboard">
-                            <span class="material-icons">content_copy</span>
-                        </button>
-                        <button class="icon-btn export-btn" onclick="exportToFile('jsonOutput', 'parsed-output.json')" title="Export to file">
-                            <span class="material-icons">download</span>
-                        </button>
+                        <button class="icon-btn" onclick="copyToClipboard('jsonOutput', this)" title="Copy to clipboard">⎘</button>
+                        <button class="icon-btn export-btn" onclick="exportToFile('jsonOutput', 'parsed-output.json')" title="Export to file">⬇</button>
                     </div>
+                </div>
+                <div class="output-wrapper">
                     <pre id="jsonOutput"></pre>
                 </div>
             </div>
@@ -82,106 +79,96 @@
         <div id="tab-diff" class="tab-content">
 
     <div class="container" id="jsonDiffInputsContainer">
-        <div class="sync-switch-container">
-            <label class="sync-switch-label">
-                Sync Scroll Inputs
-            </label>
-            <label class="sync-switch">
-                <input type="checkbox" id="syncToggleInputs" checked>
-                <span class="sync-slider"></span>
-            </label>
-            <button class="fullscreen-btn" onclick="toggleFullscreen('jsonDiffInputsContainer')" title="Toggle fullscreen">
-                <span class="material-icons" id="fullscreenIconDiffInputs">fullscreen</span>
+        <div class="control-panel">
+            <span class="control-label">CONTROLS:</span>
+            <button class="control-btn sync-btn active" id="syncBtnInputs" onclick="toggleSync('syncToggleInputs', this)" title="Toggle synchronized scrolling">
+                SYNC: ON
             </button>
+            <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonDiffInputsContainer')" title="Toggle fullscreen mode">
+                FULLSCREEN
+            </button>
+            <input type="checkbox" id="syncToggleInputs" checked style="display: none;">
         </div>
 
         <div class="content">
             <div class="box">
-                <h3 class="input-label">JSON A (Original)</h3>
-                <div class="input-wrapper">
+                <div class="box-header">
+                    <h3 class="input-label">◀ FILE A [ORIGINAL]</h3>
                     <div class="input-actions">
-                        <button class="clear-btn" onclick="clearInput('jsonInputA')" title="Clear input">
-                            <span class="material-icons">clear</span>
-                        </button>
+                        <button class="clear-btn" onclick="clearInput('jsonInputA')" title="Clear input">✖</button>
                     </div>
+                </div>
+                <div class="input-wrapper">
                     <textarea id="jsonInputA" rows="15"></textarea>
                 </div>
             </div>
 
             <div class="box">
-                <h3 class="input-label">JSON B (Compare)</h3>
-                <div class="input-wrapper">
+                <div class="box-header">
+                    <h3 class="input-label">▶ FILE B [COMPARE]</h3>
                     <div class="input-actions">
-                        <button class="clear-btn" onclick="clearInput('jsonInputB')" title="Clear input">
-                            <span class="material-icons">clear</span>
-                        </button>
+                        <button class="clear-btn" onclick="clearInput('jsonInputB')" title="Clear input">✖</button>
                     </div>
+                </div>
+                <div class="input-wrapper">
                     <textarea id="jsonInputB" rows="15"></textarea>
                 </div>
             </div>
         </div>
 
-        <button id="compareButton">Compare A and B</button>
+        <button id="compareButton">⚔ COMPARE A vs B</button>
         <div id="errorDisplayDiff" class="error-display"></div>
     </div>
 
     <div class="container" id="jsonDiffOutputsContainer">
-        <div class="sync-switch-container">
-            <label class="sync-switch-label">
-                Sync Scroll
-            </label>
-            <label class="sync-switch">
-                <input type="checkbox" id="syncToggleOutputs" checked>
-                <span class="sync-slider"></span>
-            </label>
-            <button class="fullscreen-btn" onclick="toggleFullscreen('jsonDiffOutputsContainer')" title="Toggle fullscreen">
-                <span class="material-icons" id="fullscreenIconDiffOutputs">fullscreen</span>
+        <div class="control-panel">
+            <span class="control-label">CONTROLS:</span>
+            <button class="control-btn sync-btn active" id="syncBtnOutputs" onclick="toggleSync('syncToggleOutputs', this)" title="Toggle synchronized scrolling">
+                SYNC: ON
             </button>
+            <button class="control-btn fullscreen-btn-ctrl" onclick="toggleFullscreen('jsonDiffOutputsContainer')" title="Toggle fullscreen mode">
+                FULLSCREEN
+            </button>
+            <input type="checkbox" id="syncToggleOutputs" checked style="display: none;">
         </div>
 
         <div class="content">
             <div class="box">
-                <h3 class="output-label">JSON A (Parsed)</h3>
-                <div class="output-wrapper">
+                <div class="box-header">
+                    <h3 class="output-label">★ FILE A [PARSED]</h3>
                     <div class="action-buttons">
-                        <button class="icon-btn" onclick="copyToClipboard('jsonParsedA', this)" title="Copy to clipboard">
-                            <span class="material-icons">content_copy</span>
-                        </button>
-                        <button class="icon-btn export-btn" onclick="exportToFile('jsonParsedA', 'json-a-parsed.json')" title="Export to file">
-                            <span class="material-icons">download</span>
-                        </button>
+                        <button class="icon-btn" onclick="copyToClipboard('jsonParsedA', this)" title="Copy to clipboard">⎘</button>
+                        <button class="icon-btn export-btn" onclick="exportToFile('jsonParsedA', 'json-a-parsed.json')" title="Export to file">⬇</button>
                     </div>
+                </div>
+                <div class="output-wrapper">
                     <pre id="jsonParsedA"></pre>
                 </div>
             </div>
 
             <div class="box">
-                <h3 class="output-label">JSON B (Parsed)</h3>
-                <div class="output-wrapper">
+                <div class="box-header">
+                    <h3 class="output-label">★ FILE B [PARSED]</h3>
                     <div class="action-buttons">
-                        <button class="icon-btn" onclick="copyToClipboard('jsonParsedB', this)" title="Copy to clipboard">
-                            <span class="material-icons">content_copy</span>
-                        </button>
-                        <button class="icon-btn export-btn" onclick="exportToFile('jsonParsedB', 'json-b-parsed.json')" title="Export to file">
-                            <span class="material-icons">download</span>
-                        </button>
+                        <button class="icon-btn" onclick="copyToClipboard('jsonParsedB', this)" title="Copy to clipboard">⎘</button>
+                        <button class="icon-btn export-btn" onclick="exportToFile('jsonParsedB', 'json-b-parsed.json')" title="Export to file">⬇</button>
                     </div>
+                </div>
+                <div class="output-wrapper">
                     <pre id="jsonParsedB"></pre>
                 </div>
             </div>
         </div>
 
         <div class="box" style="margin-top: 20px;">
-            <h3 class="diff-label">Comparison Result</h3>
-            <div class="output-wrapper">
+            <div class="box-header">
+                <h3 class="diff-label">⚔ DIFF REPORT</h3>
                 <div class="action-buttons">
-                    <button class="icon-btn" onclick="copyToClipboard('jsonDiffOutput', this)" title="Copy to clipboard">
-                        <span class="material-icons">content_copy</span>
-                    </button>
-                    <button class="icon-btn export-btn" onclick="exportToFile('jsonDiffOutput', 'diff-result.txt')" title="Export to file">
-                        <span class="material-icons">download</span>
-                    </button>
+                    <button class="icon-btn" onclick="copyToClipboard('jsonDiffOutput', this)" title="Copy to clipboard">⎘</button>
+                    <button class="icon-btn export-btn" onclick="exportToFile('jsonDiffOutput', 'diff-result.txt')" title="Export to file">⬇</button>
                 </div>
+            </div>
+            <div class="output-wrapper">
                 <pre id="jsonDiffOutput"></pre>
             </div>
         </div>
