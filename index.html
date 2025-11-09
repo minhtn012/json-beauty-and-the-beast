@@ -60,7 +60,10 @@
                 </div>
                 <div id="errorDisplayParser" class="error-display"></div>
                 <div class="input-wrapper">
-                    <textarea id="jsonInput" rows="20"></textarea>
+                    <div class="line-numbers-wrapper">
+                        <div class="line-numbers" id="lineNumbers-jsonInput"></div>
+                        <textarea id="jsonInput" rows="20" class="content-area"></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -73,7 +76,10 @@
                     </div>
                 </div>
                 <div class="output-wrapper">
-                    <pre id="jsonOutput"></pre>
+                    <div class="line-numbers-wrapper">
+                        <div class="line-numbers" id="lineNumbers-jsonOutput"></div>
+                        <pre id="jsonOutput" class="content-area"></pre>
+                    </div>
                 </div>
             </div>
         </div>
@@ -106,7 +112,10 @@
                 </div>
                 <div id="errorDisplayDiff" class="error-display"></div>
                 <div class="input-wrapper">
-                    <textarea id="jsonInputA" rows="15"></textarea>
+                    <div class="line-numbers-wrapper">
+                        <div class="line-numbers" id="lineNumbers-jsonInputA"></div>
+                        <textarea id="jsonInputA" rows="15" class="content-area"></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -118,7 +127,10 @@
                     </div>
                 </div>
                 <div class="input-wrapper">
-                    <textarea id="jsonInputB" rows="15"></textarea>
+                    <div class="line-numbers-wrapper">
+                        <div class="line-numbers" id="lineNumbers-jsonInputB"></div>
+                        <textarea id="jsonInputB" rows="15" class="content-area"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,7 +157,10 @@
                     </div>
                 </div>
                 <div class="output-wrapper">
-                    <pre id="jsonParsedA"></pre>
+                    <div class="line-numbers-wrapper">
+                        <div class="line-numbers" id="lineNumbers-jsonParsedA"></div>
+                        <pre id="jsonParsedA" class="content-area"></pre>
+                    </div>
                 </div>
             </div>
 
@@ -158,7 +173,10 @@
                     </div>
                 </div>
                 <div class="output-wrapper">
-                    <pre id="jsonParsedB"></pre>
+                    <div class="line-numbers-wrapper">
+                        <div class="line-numbers" id="lineNumbers-jsonParsedB"></div>
+                        <pre id="jsonParsedB" class="content-area"></pre>
+                    </div>
                 </div>
             </div>
         </div>

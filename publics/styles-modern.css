@@ -336,6 +336,11 @@ h3 {
     height: calc(100vh - 150px);
 }
 
+.fullscreen-mode .line-numbers-wrapper {
+    height: calc(100vh - 200px) !important;
+    min-height: calc(100vh - 200px) !important;
+}
+
 .fullscreen-mode textarea,
 .fullscreen-mode pre {
     height: calc(100vh - 200px) !important;
@@ -474,6 +479,52 @@ pre {
     background: linear-gradient(135deg, #fafbfc 0%, #f9fafb 100%);
     color: #0f172a;
     box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Line Numbers - Modern Code Editor Style */
+.line-numbers-wrapper {
+    display: flex;
+    width: 100%;
+    height: 60vh;
+    min-height: 400px;
+    position: relative;
+}
+
+.line-numbers {
+    min-width: 50px;
+    height: 100%;
+    padding: 18px 12px 18px 18px;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    color: #64748b;
+    font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: right;
+    user-select: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 2px solid #cbd5e1;
+    border-right: 2px solid #ff3d33;
+    border-radius: 10px 0 0 10px;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.06);
+    white-space: pre;
+}
+
+/* Hide scrollbar for line numbers */
+.line-numbers::-webkit-scrollbar {
+    display: none;
+}
+
+.line-numbers {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.content-area {
+    flex: 1;
+    height: 100%;
+    margin: 0 !important;
+    border-radius: 0 10px 10px 0 !important;
 }
 
 /* JSON Syntax Highlighting */

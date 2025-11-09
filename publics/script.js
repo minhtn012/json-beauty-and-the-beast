@@ -269,6 +269,9 @@ function clearInput(elementId) {
         element.value = '';
         element.focus();
 
+        // Update line numbers after clearing
+        updateLineNumbers(elementId, 'lineNumbers-' + elementId);
+
         // Clear from localStorage
         if (elementId === 'jsonInput') {
             clearStorage(STORAGE_KEYS.JSON_INPUT);
@@ -285,7 +288,20 @@ function clearInput(elementId) {
 // ===========================================
 function copyToClipboard(elementId, button) {
     const element = document.getElementById(elementId);
-    const text = element.textContent || element.innerText;
+
+    if (!element) return;
+
+    // Clone element to manipulate
+    const clone = element.cloneNode(true);
+
+    // Remove all toggle and collapsed elements from clone
+    const toggles = clone.querySelectorAll('.json-toggle');
+    const collapsed = clone.querySelectorAll('.json-collapsed');
+
+    toggles.forEach(toggle => toggle.remove());
+    collapsed.forEach(col => col.remove());
+
+    const text = clone.textContent || clone.innerText;
 
     if (!text || text.trim() === '') {
         return;
@@ -319,15 +335,17 @@ function exportToFile(elementId, filename) {
         return;
     }
 
-    // Get text content, stripping HTML if present
-    let text = element.textContent || element.innerText;
+    // Clone element to manipulate
+    const clone = element.cloneNode(true);
 
-    // If element contains HTML (like diff output), extract clean text
-    if (element.innerHTML !== element.textContent) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = element.innerHTML;
-        text = tempDiv.textContent || tempDiv.innerText;
-    }
+    // Remove all toggle and collapsed elements from clone
+    const toggles = clone.querySelectorAll('.json-toggle');
+    const collapsed = clone.querySelectorAll('.json-collapsed');
+
+    toggles.forEach(toggle => toggle.remove());
+    collapsed.forEach(col => col.remove());
+
+    const text = clone.textContent || clone.innerText;
 
     if (!text || text.trim() === '') {
         alert('Nothing to export!');
@@ -412,7 +430,7 @@ function highlightJSON(obj, indent = 0, path = '') {
 
         html += INDENT.repeat(indent) + ']';
         html += '</span>';
-        html += `<span class="json-collapsed" style="display:none;">...</span>]`;
+        html += `<span class="json-collapsed" style="display:none;">...</span>`;
         html += '</span>';
         return html;
     }
@@ -441,7 +459,7 @@ function highlightJSON(obj, indent = 0, path = '') {
 
         html += INDENT.repeat(indent) + '}';
         html += '</span>';
-        html += `<span class="json-collapsed" style="display:none;">...</span>}`;
+        html += `<span class="json-collapsed" style="display:none;">...</span>`;
         html += '</span>';
         return html;
     }
@@ -487,6 +505,9 @@ function setupCollapseToggle(containerId, pairedContainerId, syncToggleId) {
             toggle.textContent = '▶';
         }
 
+        // Update line numbers after collapse/expand
+        updateLineNumbers(containerId, 'lineNumbers-' + containerId);
+
         // Sync to paired container if sync is ON
         if (pairedContainerId && syncToggleId) {
             const syncToggle = document.getElementById(syncToggleId);
@@ -522,6 +543,65 @@ function syncCollapseState(containerId, path, shouldCollapse) {
         collapsed.style.display = 'none';
         toggle.textContent = '▼';
     }
+
+    // Update line numbers after syncing collapse state
+    updateLineNumbers(containerId, 'lineNumbers-' + containerId);
+}
+
+// ===========================================
+// LINE NUMBERS FUNCTIONALITY
+// ===========================================
+function updateLineNumbers(contentId, lineNumbersId) {
+    const contentElement = document.getElementById(contentId);
+    const lineNumbersElement = document.getElementById(lineNumbersId);
+
+    if (!contentElement || !lineNumbersElement) return;
+
+    let lineCount;
+
+    // For textarea elements
+    if (contentElement.tagName === 'TEXTAREA') {
+        const text = contentElement.value;
+        lineCount = text ? text.split('\n').length : 1;
+    }
+    // For pre elements - use innerText to respect CSS display:none (collapsed nodes)
+    else {
+        const text = contentElement.innerText || contentElement.textContent;
+        lineCount = text ? text.split('\n').length : 1;
+    }
+
+    // Generate line numbers
+    let lineNumbers = '';
+    for (let i = 1; i <= lineCount; i++) {
+        lineNumbers += i + '\n';
+    }
+
+    lineNumbersElement.textContent = lineNumbers;
+}
+
+function setupLineNumberSync(contentId, lineNumbersId) {
+    const contentElement = document.getElementById(contentId);
+    const lineNumbersElement = document.getElementById(lineNumbersId);
+
+    if (!contentElement || !lineNumbersElement) return;
+
+    let isSyncing = false;
+
+    // Sync scroll from content to line numbers
+    contentElement.addEventListener('scroll', () => {
+        if (isSyncing) return;
+        isSyncing = true;
+        lineNumbersElement.scrollTop = contentElement.scrollTop;
+        setTimeout(() => { isSyncing = false; }, 10);
+    });
+
+    // Sync scroll from line numbers to content
+    lineNumbersElement.addEventListener('scroll', () => {
+        if (isSyncing) return;
+        isSyncing = true;
+        contentElement.scrollTop = lineNumbersElement.scrollTop;
+        setTimeout(() => { isSyncing = false; }, 10);
+    });
 }
 
 
@@ -552,6 +632,9 @@ parseButton.addEventListener('click', () => {
         }
         parseNestedJson(data);
         jsonOutput.innerHTML = highlightJSON(data);
+
+        // Update line numbers for output
+        updateLineNumbers('jsonOutput', 'lineNumbers-jsonOutput');
     } catch (error) {
         errorDisplayParser.textContent = `Invalid JSON: ${error.message}`;
     }
@@ -657,6 +740,10 @@ compareButton.addEventListener('click', () => {
         jsonParsedA.innerHTML = highlightJSON(objA);
         jsonParsedB.innerHTML = highlightJSON(objB);
 
+        // Update line numbers for parsed outputs
+        updateLineNumbers('jsonParsedA', 'lineNumbers-jsonParsedA');
+        updateLineNumbers('jsonParsedB', 'lineNumbers-jsonParsedB');
+
         const diffs = findDifferences(objA, objB);
 
         if (diffs.length === 0) {
@@ -725,6 +812,37 @@ window.addEventListener('DOMContentLoaded', () => {
     setupCollapseToggle('jsonParsedA', 'jsonParsedB', 'syncToggleOutputs');
     setupCollapseToggle('jsonParsedB', 'jsonParsedA', 'syncToggleOutputs');
 
+    // Setup line number sync for all elements
+    setupLineNumberSync('jsonInput', 'lineNumbers-jsonInput');
+    setupLineNumberSync('jsonOutput', 'lineNumbers-jsonOutput');
+    setupLineNumberSync('jsonInputA', 'lineNumbers-jsonInputA');
+    setupLineNumberSync('jsonInputB', 'lineNumbers-jsonInputB');
+    setupLineNumberSync('jsonParsedA', 'lineNumbers-jsonParsedA');
+    setupLineNumberSync('jsonParsedB', 'lineNumbers-jsonParsedB');
+
+    // Add input event listeners for textareas to update line numbers
+    const jsonInputElement = document.getElementById('jsonInput');
+    const jsonInputAElement = document.getElementById('jsonInputA');
+    const jsonInputBElement = document.getElementById('jsonInputB');
+
+    if (jsonInputElement) {
+        jsonInputElement.addEventListener('input', () => {
+            updateLineNumbers('jsonInput', 'lineNumbers-jsonInput');
+        });
+    }
+
+    if (jsonInputAElement) {
+        jsonInputAElement.addEventListener('input', () => {
+            updateLineNumbers('jsonInputA', 'lineNumbers-jsonInputA');
+        });
+    }
+
+    if (jsonInputBElement) {
+        jsonInputBElement.addEventListener('input', () => {
+            updateLineNumbers('jsonInputB', 'lineNumbers-jsonInputB');
+        });
+    }
+
     // Load saved data from localStorage
     const savedJsonInput = loadFromStorage(STORAGE_KEYS.JSON_INPUT);
     const savedJsonInputA = loadFromStorage(STORAGE_KEYS.JSON_INPUT_A);
@@ -739,6 +857,14 @@ window.addEventListener('DOMContentLoaded', () => {
     if (savedJsonInputB) {
         document.getElementById('jsonInputB').value = savedJsonInputB;
     }
+
+    // Initialize line numbers for all elements
+    updateLineNumbers('jsonInput', 'lineNumbers-jsonInput');
+    updateLineNumbers('jsonOutput', 'lineNumbers-jsonOutput');
+    updateLineNumbers('jsonInputA', 'lineNumbers-jsonInputA');
+    updateLineNumbers('jsonInputB', 'lineNumbers-jsonInputB');
+    updateLineNumbers('jsonParsedA', 'lineNumbers-jsonParsedA');
+    updateLineNumbers('jsonParsedB', 'lineNumbers-jsonParsedB');
 
     // Setup auto-save for all inputs
     setupAutoSave('jsonInput', STORAGE_KEYS.JSON_INPUT);
